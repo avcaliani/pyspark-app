@@ -1,0 +1,12 @@
+version: '3'
+services:
+  app:
+    user: root
+    container_name: pyspark-app
+    build:
+      context: .
+    image: pyspark
+    working_dir: /app
+    volumes:
+      - .:/app
+      - ./datalake:/datalake
