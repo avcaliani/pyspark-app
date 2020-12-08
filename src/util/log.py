@@ -19,3 +19,7 @@ def __logger() -> Logger:
 
 def info(msg: str) -> None:
     __logger().info(msg)
+
+
+def error(msg: str) -> None:
+    __logger().error(msg)

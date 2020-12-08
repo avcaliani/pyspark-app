@@ -1,5 +1,6 @@
 from pyspark.sql import SparkSession
 
+from pipeline import PlayStorePipeline
 from util import log
 
 
@@ -13,4 +14,9 @@ def spark_session() -> SparkSession:
 if __name__ == '__main__':
     spark = spark_session()
     log.info(f'Spark Version: {spark.version}')
-    spark.stop()
+    try:
+        PlayStorePipeline(spark).run()
+    except Exception as ex:
+        log.error(f"Unexpected Error! {ex}")
+    finally:
+        spark.stop()
