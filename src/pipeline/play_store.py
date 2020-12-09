@@ -1,11 +1,13 @@
-
 from os import environ as env
+
 from pyspark.sql import DataFrame, functions as f
 from pyspark.sql.session import SparkSession
 
-from util import log
+from util import log, mongo
 
 TAG = 'Play Store'
+MONGO_DB = env.get('MONGO_DB', 'admin')
+MONGO_COLLECTION = 'play-store'
 DATALAKE_PATH = env.get('DATALAKE_PATH', '/datalake')
 
 
@@ -18,12 +20,22 @@ class PlayStorePipeline:
     def raw_path(self):
         return f'{DATALAKE_PATH}/raw/play-store'
 
+    @property
+    def read_uri(self):
+        return mongo.input_uri(MONGO_DB, MONGO_COLLECTION)
+
+    @property
+    def write_uri(self):
+        return mongo.output_uri(MONGO_DB, MONGO_COLLECTION)
+
     def run(self) -> None:
         log.info(f'{TAG}: STARTED')
         df = self.read()
         log.info(f'{TAG}: {df.count()} records found!')
         log.info(f'{TAG}: PROCESSING')
         self.write(self.process(df))
+        log.info(f'{TAG}: RESULTS')
+        self.show()
         log.info(f'{TAG}: FINISHED')
 
     def read(self) -> DataFrame:
@@ -34,10 +46,19 @@ class PlayStorePipeline:
             .csv(self.raw_path)
 
     def write(self, df: DataFrame) -> None:
-        # TODO: Write to Mongo
+        df.write \
+            .format('mongo') \
+            .mode('append') \
+            .option('uri', self.write_uri) \
+            .save()
+
+    def show(self):
+        df = self.spark.read \
+            .format('mongo') \
+            .option('uri', self.read_uri) \
+            .load()
         df.printSchema()
-        df.count()
-        df.show()
+        df.show(5)
 
     def process(self, df: DataFrame) -> DataFrame:
         df = self.rename_cols(df)
