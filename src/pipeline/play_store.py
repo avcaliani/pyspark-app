@@ -52,7 +52,7 @@ class PlayStorePipeline:
             .option('uri', self.write_uri) \
             .save()
 
-    def show(self):
+    def show(self) -> None:
         df = self.spark.read \
             .format('mongo') \
             .option('uri', self.read_uri) \
