@@ -3,7 +3,7 @@ from os import environ as env
 from pyspark.sql import DataFrame, functions as f
 from pyspark.sql.session import SparkSession
 
-from util import log, mongo
+from util import log, file, mongo
 
 TAG = 'Play Store'
 MONGO_DB = env.get('MONGO_DB', 'admin')
@@ -30,33 +30,15 @@ class PlayStorePipeline:
 
     def run(self) -> None:
         log.info(f'{TAG}: STARTED')
-        df = self.read()
-        log.info(f'{TAG}: {df.count()} records found!')
+        df = file.read_csv(self.spark, self.raw_path)
         log.info(f'{TAG}: PROCESSING')
-        self.write(self.process(df))
+        file.write_mongo(self.process(df), self.write_uri)
         log.info(f'{TAG}: RESULTS')
         self.show()
         log.info(f'{TAG}: FINISHED')
 
-    def read(self) -> DataFrame:
-        return self.spark \
-            .read \
-            .option('delimiter', ',') \
-            .option('header', 'true') \
-            .csv(self.raw_path)
-
-    def write(self, df: DataFrame) -> None:
-        df.write \
-            .format('mongo') \
-            .mode('append') \
-            .option('uri', self.write_uri) \
-            .save()
-
     def show(self) -> None:
-        df = self.spark.read \
-            .format('mongo') \
-            .option('uri', self.read_uri) \
-            .load()
+        df = file.read_mongo(self.spark, self.read_uri)
         df.printSchema()
         df.show(5)
 
