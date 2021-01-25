@@ -1,8 +1,8 @@
 version: '3'
 services:
-  pyspark:
+  app:
     user: root
-    container_name: pyspark
+    container_name: app
     build:
       context: .
     image: pyspark
