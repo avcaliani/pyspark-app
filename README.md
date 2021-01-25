@@ -22,7 +22,7 @@ docker-compose build
 docker-compose up -d
 
 # Execute the PySpark job
-docker-compose exec spark /app/run.sh
+docker-compose exec app /app/run.sh
 ```
 
 ![#output](.docs/output.png)
