@@ -1,6 +1,6 @@
 FROM python:3.9
 
-ENV JAVA_HOME="/usr/lib/jvm/java-8-openjdk-amd64"
+ENV JAVA_HOME="/usr/lib/jvm/java-11-openjdk-amd64"
 
 ENV SPARK_HOME="/opt/spark"
 ENV SPARK_VERSION="3.0.0"
@@ -14,7 +14,7 @@ WORKDIR /opt
 
 # Java
 RUN echo "deb http://ftp.us.debian.org/debian sid main" >> /etc/apt/sources.list
-RUN apt-get update && apt-get -y install gcc-8-base openjdk-8-jdk && apt-get -y autoremove
+RUN apt-get update && apt-get -y install gcc-8-base openjdk-11-jdk && apt-get -y autoremove
 
 # Spark
 ADD "https://archive.apache.org/dist/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-hadoop$HADOOP_VERSION.tgz" .
